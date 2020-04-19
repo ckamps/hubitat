@@ -55,6 +55,14 @@ $ sudo launchctl load ./org.alexa.cookie.nodejs.restart.plist
 ```
 These commands will start the daemon and schedule a restart of the daemon to occur at 10 minutes past midnight. See the `pm2` section above about the known issue for which a workaround is to restart the daemon on a daily basis.
 
+### Restarting the Daemon
+
+The restart `.plist` file executes the following command on a regular schedule, but you can execute it directly to restart the daemon:
+
+```
+$ sudo launchctl kickstart -k system/alexa.cookie.nodejs
+```
+
 ### Troubleshooting `launchd` Issues
 
 If you cannot access the web application on the configured ports, try these troubleshooting steps:
