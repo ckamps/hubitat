@@ -24,11 +24,67 @@ Empty username and empty password means no authentication required
 ```
 
 # How to automatically start the wrapper
+
+## Using `pm2`
+
 - Execute command ```npm install -g pm2``` to install Node Process Manager 2 and allow autostart
 - Start the application with ```pm2 start AlexaCookie.js``` command
 - Execute command ```pm2 startup```
 - Execute command ```pm2 save```
 - Due to an issue still under investigation, looks like AlexaCookie.js must be restarted after getting succesfully 1 cookie, otherwise the second refresh won't work. To workaround it, schedule ```pm2 restart AlexaCookie.js``` with cron every day
+
+## Using `launchd` on macOS
+
+The following instructions have been tested on macOS Catalina.
+
+1. Copy the example `.plist` files from `macos/` to `/Library/LaunchDaemons/`.
+2. Ensure their ownership is set apppropriately:
+
+```
+$ cd /Library/LaunchDaemons
+$ sudo chown root:wheel org.alexa.cookie.*.plist
+```
+
+3. In `org.alexa.cookie.nodejs.plist`, change the `WorkingDirectory` key if you unzipped the archive in a location other than `/Applications/`.
+4. Load the two `.plist` files:
+
+```
+$ sudo launchctl load ./org.alexa.cookie.nodejs.plist
+
+$ sudo launchctl load ./org.alexa.cookie.nodejs.restart.plist
+```
+These commands will start the daemon and schedule a restart of the daemon to occur at 10 minutes past midnight. See the `pm2` section above about the known issue for which a workaround is to restart the daemon on a daily basis.
+
+### Troubleshooting `launchd` Issues
+
+If you cannot access the web application on the configured ports, try these troubleshooting steps:
+
+1. See if the daemon is running:
+
+```
+$ ps -ef | grep AlexaCookie
+```
+
+2. Check the system log:
+
+```
+$ sudo tail -f /var/log/system.log
+```
+
+3. Check the application's `stderr` and `stdout`:
+
+```
+$ sudo tail -f  /var/log/alexa-cookie-nodejs/stderr.log
+
+$ sudo tail -f  /var/log/alexa-cookie-nodejs/stdout.log
+```
+You can stop the daemon and cancel the scheduled job by executing:
+
+```
+$ sudo launchctl unload ./org.alexa.cookie.nodejs.plist
+
+$ sudo launchctl unload ./org.alexa.cookie.nodejs.restart.plist
+```
 
 # Usage
 - Go to ```http://[serverip]:81```
